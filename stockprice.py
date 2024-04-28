@@ -1,8 +1,10 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS  # Import CORS from the flask_cors extension
 import yfinance as yf
 from waitress import serve
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes in your Flask app
 
 @app.route('/nse-stock-data')
 def get_nse_stock_data():
@@ -20,4 +22,4 @@ def get_nse_stock_data():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    serve(app,host= '0.0.0.0', port=50100,threads=2)
+    serve(app, host='0.0.0.0', port=50100)
