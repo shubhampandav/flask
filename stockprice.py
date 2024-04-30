@@ -12,14 +12,27 @@ authorized_keys = {
     "12f5f96f-6b51-4b4a-9bf9-b23e6d728b39": "admin"
 }
 
-def calculate_resistance_support(previous_close):
-    resistance1 = (previous_close ** 0.5 + 0.125) ** 2
-    resistance2 = (previous_close ** 0.5 + 0.25) ** 2
-    resistance3 = (previous_close ** 0.5 + 0.5) ** 2
-    support1 = (previous_close ** 0.5 - 0.125) ** 2
-    support2 = (previous_close ** 0.5 - 0.25) ** 2
-    support3 = (previous_close ** 0.5 - 0.5) ** 2
+# Variable to store the latest updated price
+latest_updated_price = None
+last_updated_time = None
+
+def calculate_resistance_support(latest_updated_price):
+    resistance1 = (latest_updated_price ** 0.5 + 0.125) ** 2
+    resistance2 = (latest_updated_price ** 0.5 + 0.25) ** 2
+    resistance3 = (latest_updated_price ** 0.5 + 0.5) ** 2
+    support1 = (latest_updated_price ** 0.5 - 0.125) ** 2
+    support2 = (latest_updated_price ** 0.5 - 0.25) ** 2
+    support3 = (latest_updated_price ** 0.5 - 0.5) ** 2
     return resistance1, resistance2, resistance3, support1, support2, support3
+
+def update_latest_price(stock_name):
+    global latest_updated_price, last_updated_time
+    if datetime.now().weekday() < 5:  # Check if it's a weekday (Mon-Fri)
+        now = datetime.now()
+        if now.hour == 8 and now.minute >= 58:  # Check if it's 3:40 PM or later
+            stock = yf.Ticker(stock_name)  # Example stock symbol, replace with the desired symbol
+            latest_updated_price = stock.history(period='1d')['Close'].iloc[-1]
+            last_updated_time = now
 
 @app.route('/stock', methods=['GET'])
 def get_stock_price():
@@ -32,18 +45,15 @@ def get_stock_price():
         return jsonify({'error': 'Stock name not provided'}), 400
 
     try:
-        stock_data = yf.Ticker(stock_name)
-        # Fetch data for the last two trading days
-        historical_data = stock_data.history(period='2d')
-        # Extract the closing price for the previous trading day
-        previous_close = historical_data.iloc[-2]['Close']
+        global latest_updated_price, last_updated_time
+        update_latest_price(stock_name)  # Pass stock_name to the function
 
         # Calculate resistance and support levels
-        resistance1, resistance2, resistance3, support1, support2, support3 = calculate_resistance_support(previous_close)
+        resistance1, resistance2, resistance3, support1, support2, support3 = calculate_resistance_support(latest_updated_price)
 
         return jsonify({
             'stock_name': stock_name,
-            'previous_close': previous_close,
+            'latest_updated_price': latest_updated_price,  # Return the latest updated price
             'resistance1': resistance1,
             'resistance2': resistance2,
             'resistance3': resistance3,
