@@ -29,7 +29,7 @@ def update_latest_price(stock_name):
     global latest_updated_price, last_updated_time
     if datetime.now().weekday() < 5:  # Check if it's a weekday (Mon-Fri)
         now = datetime.now()
-        if now.hour == 8 and now.minute >= 58:  # Check if it's 3:40 PM or later
+        if now.hour == 10 and now.minute >= 2:  # Check if it's 3:40 PM or later
             stock = yf.Ticker(stock_name)  # Example stock symbol, replace with the desired symbol
             latest_updated_price = stock.history(period='1d')['Close'].iloc[-1]
             last_updated_time = now
