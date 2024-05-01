@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import yfinance as yf
-from datetime import datetime, timedelta
 from waitress import serve
 
 app = Flask(__name__)
@@ -41,11 +40,14 @@ def get_stock_price():
         historical_data = stock_data.history(period='2d')
         # Extract the closing price for the previous trading day
         previous_close = historical_data.iloc[-2]['Close']
+        # Fetch full name of the stock
+        stock_full_name = stock_data.info['longName']
 
         # Calculate resistance and support levels
         resistance1, resistance2, resistance3, support1, support2, support3 = calculate_resistance_support(previous_close)
 
         return jsonify({
+            'stock_full_name': stock_full_name,
             'stock_name': stock_name,  # Returning the modified stock name with ".NS"
             'previous_close': previous_close,
             'resistance1': resistance1,
