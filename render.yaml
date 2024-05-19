@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: whatsapp-automation
+    env: python
+    plan: free
+    buildCommand: "bash setup.sh"
+    startCommand: "python stockprice.py"
